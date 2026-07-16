@@ -46,7 +46,7 @@
             <thead class="bg-slate-100">
 
                 <tr>
-
+                    <th class="p-4">Curso</th>
                     <th class="p-4 text-left">Grupo</th>
                     <th class="p-4 text-left">Tema</th>
                     <th class="p-4 text-left">Materia</th>
@@ -66,68 +66,40 @@
                     <tr class="border-b hover:bg-slate-50">
 
                         <td class="p-4">
-
+                            {{ $grupo->curso?->nombre ?? 'Sin curso' }}
+                        </td>
+                        <td class="p-4">
                             {{ $grupo->nombre_grupo }}
-
                         </td>
-
                         <td class="p-4">
-
                             {{ $grupo->tema }}
-
                         </td>
-
                         <td class="p-4">
-
                             {{ $grupo->materia->nombre ?? '-' }}
-
                         </td>
-
                         <td class="p-4">
-
                             {{ $grupo->tipo }}
-
                         </td>
-
                         <td class="p-4">
-
                             {{ $grupo->docente->nombre ?? '-' }}
-
                         </td>
-
                         <td class="p-4">
-
                             @if($grupo->estado == 'Pendiente')
-
                                 <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
-
                                     {{ $grupo->estado }}
-
                                 </span>
-
                             @elseif($grupo->estado == 'Aprobado')
-
                                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full">
-
                                     {{ $grupo->estado }}
-
                                 </span>
-
                             @else
-
                                 <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full">
-
                                     {{ $grupo->estado }}
-
                                 </span>
-
                             @endif
-
                         </td>
-
                         <td class="p-4">
                         <div class="flex flex-col items-center gap-2">
-
                             <a
                                 href="{{ route('grupos.integrantes', $grupo->id) }}"
                                 class="w-32 rounded-lg bg-indigo-600 px-3 py-2 text-center text-white hover:bg-indigo-700"

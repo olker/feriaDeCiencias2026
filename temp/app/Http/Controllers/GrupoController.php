@@ -7,18 +7,34 @@ use Illuminate\Http\Request;
 use App\Models\Grupo;
 use App\Models\Materia;
 use App\Models\Alumno;
+use App\Models\DocenteAsignacion;
+use App\Models\DocenteCurso;
+use App\Models\Curso;
+use Illuminate\Support\Str;
 
 class GrupoController extends Controller
 {
     public function index()
     {
         if (auth()->user()->es_admin) {
-            $grupos = Grupo::with(['materia','docente'])->get();
+            $grupos = Grupo::with([
+                'materia',
+                'curso',
+                'docente',
+                'alumnos'
+            ])->get();
         } else {
             $grupos = Grupo::where(
-                'docente_creador_id',
-                auth()->id()
-            )->with(['materia','docente'])->get();
+                    'docente_creador_id',
+                    auth()->id()
+                )
+                ->with([
+                    'materia',
+                    'curso',
+                    'docente',
+                    'alumnos'
+                ])
+                ->get();
         }
 
         return view('grupos.index', compact('grupos'));
@@ -26,72 +42,121 @@ class GrupoController extends Controller
 
     public function create()
     {
-           
-        $materias = Materia::all();
-        return view(
-            'grupos.create',
-            compact('materias')
-        );
+        $asignaciones = DocenteCurso::with([
+            'curso',
+            'materia'
+        ])
+            ->where('docente_id', auth()->id())
+            ->get();
+
+        $cursos = $asignaciones
+            ->pluck('curso')
+            ->filter()
+            ->unique('id')
+            ->sortBy('id')
+            ->values();
+
+        $materias = $asignaciones
+            ->pluck('materia')
+            ->filter()
+            ->unique('id')
+            ->sortBy('nombre')
+            ->values();
+
+        return view('grupos.create', compact(
+            'cursos',
+            'materias'
+        ));
     }
     public function store(Request $request)
     {
-        
-         $request->validate([
-            'nombre_grupo' => 'required|string|max:255',
-            'tema' => 'required|string|max:255',
+        $request->validate([
+            'nombre_grupo' => 'required|string|max:100',
+            'tema' => 'required|string|max:200',
             'materia_id' => 'required|exists:materias,id',
-            'tipo' => 'required|string|max:255',
-            'stand' => 'nullable|string|max:255',
+            'curso_id' => 'required|exists:cursos,id',
+            'tipo' => 'required|in:Individual,Grupal',
             'descripcion' => 'nullable|string|max:1000',
+        ], [
+            'nombre_grupo.required' => 'Ingrese el nombre del grupo.',
+            'tema.required' => 'Ingrese el tema del proyecto.',
+            'materia_id.required' => 'Seleccione una materia.',
+            'curso_id.required' => 'Seleccione un curso.',
+            'tipo.required' => 'Seleccione el tipo de exposición.',
         ]);
 
         Grupo::create([
             'nombre_grupo' => $request->nombre_grupo,
             'tema' => $request->tema,
             'materia_id' => $request->materia_id,
+            'curso_id' => $request->curso_id,
             'tipo' => $request->tipo,
-            'estado' => 1,
+            'qr_token' => Str::uuid(),
+            'estado' => 'Pendiente',
             'descripcion' => $request->descripcion,
             'docente_creador_id' => auth()->id(),
         ]);
 
         return redirect()
-                ->route('grupos.index')
-                ->with('success', 'Grupo creado correctamente');
+            ->route('grupos.index')
+            ->with('success', 'Grupo registrado correctamente.');
     }
-    function edit($id)
+    public function edit($id)
     {
         $grupo = Grupo::findOrFail($id);
-        $materias = Materia::all();
-        return view(
-            'grupos.edit',
-            compact('grupo', 'materias')
-        );
-    }
-    function update(Request $request, $id)
-    {
-        $request->validate([
-            'nombre_grupo' => 'required|string|max:255',
-            'tema' => 'required|string|max:255',
-            'materia_id' => 'required|exists:materias,id',
-            'tipo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:1000',
-        ]); 
+        $materias = Materia::orderBy('nombre')->get();
+        $cursos = Curso::orderBy('id')->get();
 
+        return view('grupos.edit', compact(
+            'grupo',
+            'materias',
+            'cursos'
+        ));
+    }
+    public function update(Request $request, $id)
+    {
         $grupo = Grupo::findOrFail($id);
-        $grupo->update($request->all());
+
+        $request->validate([
+            'nombre_grupo' => 'required|string|max:100',
+            'tema' => 'required|string|max:200',
+            'materia_id' => 'required|exists:materias,id',
+            'curso_id' => 'required|exists:cursos,id',
+            'tipo' => 'required|in:Individual,Grupal',
+            'estado' => 'required|in:Pendiente,Evaluado',
+            'descripcion' => 'nullable|string|max:1000',
+        ]);
+
+        $grupo->update([
+            'nombre_grupo' => $request->nombre_grupo,
+            'tema' => $request->tema,
+            'materia_id' => $request->materia_id,
+            'curso_id' => $request->curso_id,
+            'tipo' => $request->tipo,
+            'estado' => $request->estado,
+            'descripcion' => $request->descripcion,
+        ]);
 
         return redirect()
-                ->route('grupos.index')
-                ->with('success', 'Grupo actualizado correctamente');
+            ->route('grupos.index')
+            ->with('success', 'Grupo actualizado correctamente.');
     }
-    public function integrantes($id)
+   public function integrantes($id)
     {
-        $grupo = Grupo::with(['alumnos.curso', 'materia'])
-            ->findOrFail($id);
-        $alumnosAsignados = DB::table('grupo_alumno')
+        $grupo = Grupo::with([
+            'alumnos.curso',
+            'materia',
+            'curso'
+        ])->findOrFail($id);
+
+        $alumnosOcupados = DB::table('grupo_alumno')
+            ->where('grupo_id', '!=', $grupo->id)
             ->pluck('alumno_id');
-        $alumnos = Alumno::where('id', $grupo->curso_id)
+
+        $alumnos = Alumno::with('curso')
+            ->where('curso_id', $grupo->curso_id)
+            ->whereNotIn('id', $alumnosOcupados)
+            ->orderBy('nombre')
             ->get();
 
         return view('grupos.integrantes', compact(

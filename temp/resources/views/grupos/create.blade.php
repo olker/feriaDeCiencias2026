@@ -2,135 +2,234 @@
 
 @section('contenido')
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto px-4 py-6">
 
-    <div class="bg-white rounded-2xl shadow-lg p-8">
-
-        <h1 class="text-3xl font-bold text-green-700 mb-8">
-            ➕ Nuevo Grupo de Feria
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">
+            Registrar nuevo grupo
         </h1>
 
-        <form action="{{ route('grupos.store') }}" method="POST">
+        <p class="mt-1 text-slate-600">
+            Complete los datos del proyecto para registrarlo en la Feria de Ciencias.
+        </p>
+    </div>
 
+    @if(session('error'))
+        <div class="mb-5 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-red-800">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="rounded-xl bg-white p-6 shadow">
+
+        <form
+            action="{{ route('grupos.store') }}"
+            method="POST"
+        >
             @csrf
 
-            <!-- Nombre del Grupo -->
-            <div class="mb-5">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-                <label class="block font-semibold mb-2">
-                    Nombre del Grupo
-                </label>
+                {{-- Nombre del grupo --}}
+                <div>
+                    <label
+                        for="nombre_grupo"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Nombre del grupo
+                    </label>
 
-                <input type="text"
-                       name="nombre_grupo"
-                       value="{{ old('nombre_grupo') }}"
-                       class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500"
-                       required>
+                    <input
+                        type="text"
+                        name="nombre_grupo"
+                        id="nombre_grupo"
+                        value="{{ old('nombre_grupo') }}"
+                        placeholder="Ejemplo: Semáforo inteligente"
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('nombre_grupo') ? 'border-red-500' : 'border-slate-300' }}"
+                    >
 
-            </div>
+                    @error('nombre_grupo')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
 
+                {{-- Tema --}}
+                <div>
+                    <label
+                        for="tema"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Tema del proyecto
+                    </label>
 
-            <!-- Tema -->
-            <div class="mb-5">
+                    <input
+                        type="text"
+                        name="tema"
+                        id="tema"
+                        value="{{ old('tema') }}"
+                        placeholder="Ejemplo: Control inteligente del tráfico"
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('tema') ? 'border-red-500' : 'border-slate-300' }}"
+                    >
 
-                <label class="block font-semibold mb-2">
-                    Tema del Proyecto
-                </label>
+                    @error('tema')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
 
-                <input type="text"
-                       name="tema"
-                       value="{{ old('tema') }}"
-                       class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500"
-                       required>
+                {{-- Materia --}}
+                <div>
+                    <label
+                        for="materia_id"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Materia
+                    </label>
 
-            </div>
-
-
-            <!-- Materia -->
-            <div class="mb-5">
-
-                <label class="block font-semibold mb-2">
-                    Materia
-                </label>
-
-                <select name="materia_id"
-                        class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500"
-                        required>
-
-                    <option value="">
-                        Seleccione una materia
-                    </option>
-
-                    @foreach($materias as $materia)
-
-                        <option value="{{ $materia->id }}">
-
-                            {{ $materia->nombre }}
-
+                    <select
+                        name="materia_id"
+                        id="materia_id"
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('materia_id') ? 'border-red-500' : 'border-slate-300' }}"
+                    >
+                        <option value="">
+                            Seleccione una materia
                         </option>
 
-                    @endforeach
+                        @foreach($materias as $materia)
+                            <option
+                                value="{{ $materia->id }}"
+                                {{ old('materia_id') == $materia->id ? 'selected' : '' }}
+                            >
+                                {{ $materia->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                </select>
+                    @error('materia_id')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- Curso --}}
+                <div>
+                    <label
+                        for="curso_id"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Curso
+                    </label>
+
+                    <select
+                        name="curso_id"
+                        id="curso_id"
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('curso_id') ? 'border-red-500' : 'border-slate-300' }}"
+                    >
+                        <option value="">
+                            Seleccione un curso
+                        </option>
+
+                        @foreach($cursos as $curso)
+                            <option
+                                value="{{ $curso->id }}"
+                                {{ old('curso_id') == $curso->id ? 'selected' : '' }}
+                            >
+                                {{ $curso->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @error('curso_id')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- Tipo --}}
+                <div>
+                    <label
+                        for="tipo"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Tipo de exposición
+                    </label>
+
+                    <select
+                        name="tipo"
+                        id="tipo"
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('tipo') ? 'border-red-500' : 'border-slate-300' }}"
+                    >
+                        <option value="">
+                            Seleccione el tipo
+                        </option>
+
+                        <option
+                            value="Individual"
+                            {{ old('tipo') === 'Individual' ? 'selected' : '' }}
+                        >
+                            Individual
+                        </option>
+
+                        <option
+                            value="Grupal"
+                            {{ old('tipo') === 'Grupal' ? 'selected' : '' }}
+                        >
+                            Grupal
+                        </option>
+                    </select>
+
+                    @error('tipo')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- Descripción --}}
+                <div class="md:col-span-2">
+                    <label
+                        for="descripcion"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                        Descripción del proyecto
+                    </label>
+
+                    <textarea
+                        name="descripcion"
+                        id="descripcion"
+                        rows="5"
+                        placeholder="Describa brevemente el funcionamiento y objetivo del proyecto."
+                        class="w-full rounded-lg border px-3 py-2 {{ $errors->has('descripcion') ? 'border-red-500' : 'border-slate-300' }}"
+                    >{{ old('descripcion') }}</textarea>
+
+                    @error('descripcion')
+                        <p class="mt-1 text-sm text-red-500">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
 
             </div>
 
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
 
-            <!-- Tipo -->
-            <div class="mb-5">
-
-                <label class="block font-semibold mb-2">
-                    Tipo de Proyecto
-                </label>
-
-                <select name="tipo"
-                        class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500"
-                        required>
-
-                    <option value="">
-                        Seleccione un tipo
-                    </option>
-
-                    <option value="Individual">
-                        Individual
-                    </option>
-                      <option value="Grupal">
-                        Grupal
-                    </option>
-                </select>
-
-            </div>
-
-            <!-- Descripción -->
-            <div class="mb-8">
-
-                <label class="block font-semibold mb-2">
-                    Descripción
-                </label>
-
-                <textarea
-                    name="descripcion"
-                    rows="5"
-                    class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500">{{ old('descripcion') }}</textarea>
-
-            </div>
-
-
-            <div class="flex gap-4">
-
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-md">
-
-                    Guardar Grupo
-
+                <button
+                    type="submit"
+                    class="rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white transition hover:bg-blue-700"
+                >
+                    Guardar grupo
                 </button>
 
-
-                <a href="{{ route('grupos.index') }}"
-                   class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl shadow-lg">
-
+                <a
+                    href="{{ route('grupos.index') }}"
+                    class="rounded-lg bg-slate-500 px-5 py-2 text-center font-semibold text-white transition hover:bg-slate-600"
+                >
                     Cancelar
-
                 </a>
 
             </div>
