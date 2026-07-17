@@ -50,4 +50,19 @@ class Grupo extends Model
             'alumno_id'
         );
     }
+   public function calificaciones()
+    {
+        return $this->hasMany(
+            Calificacion::class,
+            'grupo_id'
+        );
+    }
+
+    public function asignacionesEvaluadores()
+    {
+        return $this->hasMany(
+            DocenteAsignacion::class,
+            'grupo_id'
+        );
+    }
 }

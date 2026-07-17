@@ -1,15 +1,22 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\DocenteController;
-use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\MateriaController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\AsignacionEvaluadorController;
+use App\Http\Controllers\EvaluacionController;
+use App\Http\Controllers\ReporteCalificacionController;
+
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+});
 
 Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
@@ -56,8 +63,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/evaluadores/{id}',[AsignacionEvaluadorController::class, 'destroy'])
                 ->name('evaluadores.destroy');
         //docente-materia
-        Route::get('/docente-materia', [DocenteController::class, 'materiaIndex'])
-                ->name('docente-materia.index');        
+        Route::get('/docente-materia', [DocenteController::class, 'evaluadorIndex'])
+                ->name('evaluador-index.index');        
 
         //Alumnos
 
@@ -99,8 +106,17 @@ Route::middleware('auth')->group(function () {
 
         //evaluaciones
 
-        Route::get('/evaluaciones', function () {
-                return view('evaluaciones.index');
-        })->name('evaluaciones.index');
+        Route::get('/evaluaciones',[EvaluacionController::class, 'index'])->name('evaluaciones.index');
+        Route::get('/evaluaciones/{grupo}/crear',[EvaluacionController::class, 'create'])->name('evaluaciones.create');
+        Route::post('/evaluaciones/{grupo}',[EvaluacionController::class, 'store'])->name('evaluaciones.store');
+
+        //evaluadores
+        Route::get('/evaluadores',[AsignacionEvaluadorController::class, 'index'])->name('evaluadores.index');
+        Route::post('/evaluadores',[AsignacionEvaluadorController::class, 'store'])->name('evaluadores.store');
+        Route::delete('/evaluadores/{id}',[AsignacionEvaluadorController::class, 'destroy'])->name('evaluadores.destroy');
+
+        //reporte de calificaciones
+        Route::get('/reportes/calificaciones/detalle',[ReporteCalificacionController::class, 'detalle'])->name('reportes.detalle');
+        Route::get('/reportes/calificaciones/resumen',[ReporteCalificacionController::class, 'resumen'])->name('reportes.resumen');
 });
 require __DIR__.'/auth.php';

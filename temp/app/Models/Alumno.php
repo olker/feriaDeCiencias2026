@@ -28,4 +28,11 @@ class Alumno extends Model
             'grupo_id'
         );
     }
+    public function calificaciones()
+    {
+        return $this->hasMany(
+            Calificacion::class,
+            'alumno_id'
+        );
+    }
 }

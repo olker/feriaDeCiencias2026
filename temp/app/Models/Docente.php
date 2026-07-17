@@ -28,4 +28,26 @@ class Docente extends Authenticatable
     {
         return $this->hasMany(Grupo::class, 'id_docente');
     }
+    public function asignacionesEvaluador()
+    {
+        return $this->hasMany(
+            DocenteAsignacion::class,
+            'docente_id'
+        );
+    }
+
+    public function calificaciones()
+    {
+        return $this->hasMany(
+            Calificacion::class,
+            'docente_id'
+        );
+    }
+    public function gruposCreados()
+    {
+        return $this->hasMany(
+            Grupo::class,
+            'docente_creador_id'
+        );
+    }
 }

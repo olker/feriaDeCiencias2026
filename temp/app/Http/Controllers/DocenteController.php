@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Docente;
+use App\Models\DocenteAsignacion;
+use App\Models\Grupo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -74,5 +76,74 @@ class DocenteController extends Controller
         Docente::findOrFail($id)->delete();
 
         return redirect()->route('docentes.index');
+    }
+    public function evaluadorIndex()
+    {
+        $docentes = Docente::where('estado', 1)
+            ->where('es_admin', 0)
+            ->orderBy('nombre')
+            ->get();
+
+        $grupos = Grupo::with([
+            'materia',
+            'curso'
+        ])
+            ->orderBy('nombre_grupo')
+            ->get();
+
+        $asignaciones = DocenteAsignacion::with([
+            'docente',
+            'grupo.materia',
+            'grupo.curso'
+        ])
+            ->orderBy('docente_id')
+            ->get();
+
+        return view('docentes.evaluadores', compact(
+            'docentes',
+            'grupos',
+            'asignaciones'
+        ));
+    }
+    public function guardarEvaluador(Request $request)
+    {
+        $request->validate([
+            'docente_id' => 'required|exists:docentes,id',
+            'grupo_id' => 'required|exists:grupos,id',
+        ], [
+            'docente_id.required' => 'Seleccione un docente.',
+            'docente_id.exists' => 'El docente seleccionado no existe.',
+            'grupo_id.required' => 'Seleccione un grupo.',
+            'grupo_id.exists' => 'El grupo seleccionado no existe.',
+        ]);
+
+        $existe = DocenteAsignacion::where('docente_id', $request->docente_id)
+            ->where('grupo_id', $request->grupo_id)
+            ->exists();
+
+        if ($existe) {
+            return back()
+                ->withInput()
+                ->with('error', 'Este docente ya está asignado a ese grupo.');
+        }
+
+        DocenteAsignacion::create([
+            'docente_id' => $request->docente_id,
+            'grupo_id' => $request->grupo_id,
+        ]);
+
+        return redirect()
+            ->route('docentes.evaluadores')
+            ->with('success', 'Evaluador asignado correctamente.');
+    }
+    public function eliminarEvaluador($id)
+    {
+        $asignacion = DocenteAsignacion::findOrFail($id);
+
+        $asignacion->delete();
+
+        return redirect()
+            ->route('docentes.evaluadores')
+            ->with('success', 'Asignación eliminada correctamente.');
     }
 }

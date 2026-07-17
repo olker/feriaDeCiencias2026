@@ -44,9 +44,11 @@
                 📝 Asignaciones Docente
             </a>
 
-            <a href="{{ route('docente-materia.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                📖 Materias Docente
+             <a
+                href="{{ route('evaluadores.index') }}"
+                class="block px-6 py-3 hover:bg-slate-800"
+            >
+                👨‍🏫 Asignar evaluadores
             </a>
 
         @endif
@@ -58,6 +60,35 @@
         class="block px-6 py-3 hover:bg-slate-800">
             ⭐ Evaluaciones
         </a>
+        @php
+            $mostrarReportes =
+                auth()->user()->es_admin
+                || auth()->user()
+                    ->gruposCreados()
+                    ->exists();
+        @endphp
+
+        @if($mostrarReportes)
+
+            <div class="px-6 pt-4 pb-1 text-xs font-bold uppercase text-slate-400">
+                Reportes
+            </div>
+
+            <a
+                href="{{ route('reportes.detalle') }}"
+                class="block px-6 py-3 hover:bg-slate-800"
+            >
+                📊 Reporte detallado
+            </a>
+
+            <a
+                href="{{ route('reportes.resumen') }}"
+                class="block px-6 py-3 hover:bg-slate-800"
+            >
+                📋 Notas por curso
+            </a>
+
+        @endif
        <form method="POST" action="{{ route('cerrar.sesion') }}">
             @csrf
             <button type="submit"
