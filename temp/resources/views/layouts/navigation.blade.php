@@ -1,101 +1,186 @@
-<div class="w-64 bg-slate-900 text-white min-h-screen shadow-xl">
+@auth
 
-    <div class="p-6 border-b border-slate-700">
+<nav class="space-y-1 px-3 py-5">
 
-        <h1 class="text-2xl font-bold text-cyan-400">
-            Feria 2026
-        </h1>
+    {{-- Inicio --}}
+    <a
+        href="{{ route('dashboard') }}"
+        class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+        {{ request()->routeIs('dashboard')
+            ? 'bg-blue-600 text-white'
+            : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+    >
+        <span>🏠</span>
+        <span>Inicio</span>
+    </a>
 
-        <p class="text-sm text-gray-300">
-            Panel Administrativo
-        </p>
+    {{-- Administrador --}}
+    @if(auth()->user()->es_admin)
 
+        <div class="px-4 pb-1 pt-5 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Administración
+        </div>
+
+        <a
+            href="{{ route('docentes.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('docentes.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>👨‍🏫</span>
+            <span>Docentes</span>
+        </a>
+
+        <a
+            href="{{ route('alumnos.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('alumnos.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>👨‍🎓</span>
+            <span>Estudiantes</span>
+        </a>
+
+        <a
+            href="{{ route('cursos.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('cursos.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>🏫</span>
+            <span>Cursos</span>
+        </a>
+
+        <a
+            href="{{ route('materias.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('materias.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>📚</span>
+            <span>Materias</span>
+        </a>
+
+        <a
+            href="{{ route('asignaciones.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('asignaciones.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>📌</span>
+            <span>Asignar cursos</span>
+        </a>
+
+        <a
+            href="{{ route('evaluadores.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('evaluadores.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>✅</span>
+            <span>Asignar evaluadores</span>
+        </a>
+
+    @endif
+
+    {{-- Feria --}}
+    <div class="px-4 pb-1 pt-5 text-xs font-bold uppercase tracking-wider text-slate-500">
+        Feria
     </div>
 
-    <div class="mt-6 space-y-2">
-        <a href="{{ route('dashboard') }}"
-        class="block px-6 py-3 hover:bg-slate-800">
-            🏠 Panel Principal
+    <a
+        href="{{ route('grupos.index') }}"
+        class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+        {{ request()->routeIs('grupos.*')
+            ? 'bg-blue-600 text-white'
+            : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+    >
+        <span>👥</span>
+        <span>Grupos</span>
+    </a>
+
+    @if(!auth()->user()->es_admin)
+
+        <a
+            href="{{ route('evaluaciones.index') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('evaluaciones.*')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>📝</span>
+            <span>Evaluaciones</span>
         </a>
-       @if(auth()->user()->es_admin)
 
-            <a href="{{ route('docentes.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                👨‍🏫 Docentes
-            </a>
+    @endif
 
-            <a href="{{ route('alumnos.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                🎓 Alumnos
-            </a>
+    {{-- Reportes --}}
+    @php
+        $mostrarReportes =
+            auth()->user()->es_admin
+            || \App\Models\Grupo::where(
+                'docente_creador_id',
+                auth()->id()
+            )->exists();
+    @endphp
 
-            <a href="{{ route('cursos.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                📚 Cursos
-            </a>
+    @if($mostrarReportes)
 
-            <a href="{{ route('materias.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                📖 Materias
-            </a>
+        <div class="px-4 pb-1 pt-5 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Reportes
+        </div>
 
-            <a href="{{ route('asignaciones.index') }}"
-            class="block px-6 py-3 hover:bg-slate-800">
-                📝 Asignaciones Docente
-            </a>
-
-             <a
-                href="{{ route('evaluadores.index') }}"
-                class="block px-6 py-3 hover:bg-slate-800"
-            >
-                👨‍🏫 Asignar evaluadores
-            </a>
-
-        @endif
-        <a href="{{ route('grupos.index') }}"
-        class="block px-6 py-3 hover:bg-slate-800">
-            🧪 Mis Grupos
+        <a
+            href="{{ route('reportes.detalle') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('reportes.detalle')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>📊</span>
+            <span>Reporte detallado</span>
         </a>
-        <a href="{{ route('evaluaciones.index') }}"
-        class="block px-6 py-3 hover:bg-slate-800">
-            ⭐ Evaluaciones
+
+        <a
+            href="{{ route('reportes.resumen') }}"
+            class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition
+            {{ request()->routeIs('reportes.resumen')
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}"
+        >
+            <span>📋</span>
+            <span>Notas por curso</span>
         </a>
-        @php
-            $mostrarReportes =
-                auth()->user()->es_admin
-                || auth()->user()
-                    ->gruposCreados()
-                    ->exists();
-        @endphp
 
-        @if($mostrarReportes)
+    @endif
 
-            <div class="px-6 pt-4 pb-1 text-xs font-bold uppercase text-slate-400">
-                Reportes
-            </div>
+    {{-- Cerrar sesión --}}
+    <div class="pt-6">
 
-            <a
-                href="{{ route('reportes.detalle') }}"
-                class="block px-6 py-3 hover:bg-slate-800"
-            >
-                📊 Reporte detallado
-            </a>
-
-            <a
-                href="{{ route('reportes.resumen') }}"
-                class="block px-6 py-3 hover:bg-slate-800"
-            >
-                📋 Notas por curso
-            </a>
-
-        @endif
-       <form method="POST" action="{{ route('cerrar.sesion') }}">
+        <form
+            action="{{ route('cerrar.sesion') }}"
+            method="POST"
+        >
             @csrf
-            <button type="submit"
-                class="block w-full text-left px-6 py-3 hover:bg-slate-800">
-                🚪 Cerrar sesión
+
+            <button
+                type="submit"
+                class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium text-red-300 transition hover:bg-red-900/40 hover:text-red-200"
+            >
+                <span>🚪</span>
+                <span>Cerrar sesión</span>
             </button>
+
         </form>
+
     </div>
 
-</div>
+</nav>
+
+@endauth

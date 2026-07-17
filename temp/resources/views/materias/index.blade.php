@@ -16,7 +16,9 @@
         </a>
     </div>
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <table class="w-full">
+        <div class="overflow-x-auto">
+
+        <table class="min-w-[800px] w-full text-sm">
             <thead class="bg-gray-100">
                 <tr>
                     <th class="p-4 text-left">
@@ -55,6 +57,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 @endsection
